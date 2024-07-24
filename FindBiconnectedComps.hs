@@ -26,7 +26,7 @@ type Bounds = (Vertex, Vertex)
 --builds a table detailing the number of edges leaving each vertex.
 outdegree :: Graph -> Table Int
 outdegree g = mapT numEdges g
-where numEdges v us = length ws
+ where numEdges v us = length ws
 
 --build up a graph from a list of edges we define buildG
 {-Like array the Haskell function accumArray builds an array from
@@ -50,7 +50,7 @@ reverseE g = [ (w,v) | (v,w) <- edges g]
 by, for example, building an array incrementally as we traverse the graph,
 we simply reuse previously defined functions, combining them in afresh way.
 The result is shorter and clearer-}
-indegree :: Graph -> ‘l’able Int
+indegree :: Graph -> Table Int
 indegree g = outdegree (transpose g)
 
 {- BiConnected Components
