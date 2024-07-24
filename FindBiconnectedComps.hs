@@ -1,4 +1,4 @@
-import Data.Graph
+import Data.Graph (Vertex, dfs)
 import Data.Tree
 import Data.Array
 
@@ -24,9 +24,9 @@ mapT f t = array (bounds t) [(v, f v (t!v)) | v<-indices t]
 type Bounds = (Vertex, Vertex)
 
 --builds a table detailing the number of edges leaving each vertex.
-outdegree :: Graph -> Table Int
-outdegree g = mapT numEdges g
- where numEdges v us = length ws
+findoutdegree :: Graph -> Table Int
+findoutdegree g = mapT numEdges g
+    where numEdges v ws = length ws
 
 --build up a graph from a list of edges we define buildG
 {-Like array the Haskell function accumArray builds an array from
@@ -34,14 +34,14 @@ outdegree g = mapT numEdges g
 accumArray accepts possibly many values for each indexed
 location, which are combined using the function provided as
 accunulrray’s first argument.-}
-buildG :: Bounds -> [Edge] -> Graph
-buildG bnds es = accumArray (flip (:)) [] bnds es
+buildGraph :: Bounds -> [Edge] -> Graph
+buildGraph bnds es = accumArray (flip (:)) [] bnds es
 
---Combining the functions edges and buildG gives us a
+--Combining the functions edges and buildGraph gives us a
 --way to reverse all the edges in a graph giving the transpose
 --of the graph:
 transpose :: Graph -> Graph
-transpose g = buildG (bounds g) (reverseE g)
+transpose g = buildGraph (bounds g) (reverseE g)
 
 reverseE :: Graph -> [Edge]
 reverseE g = [ (w,v) | (v,w) <- edges g]
@@ -51,7 +51,7 @@ by, for example, building an array incrementally as we traverse the graph,
 we simply reuse previously defined functions, combining them in afresh way.
 The result is shorter and clearer-}
 indegree :: Graph -> Table Int
-indegree g = outdegree (transpose g)
+indegree g = findoutdegree (transpose g)
 
 {- BiConnected Components
 We end by programming a more complex algorithm—finding
@@ -64,8 +64,8 @@ route?
 -}
 
 -- Calculate the depth-first spanning forest
-dff :: Graph -> Forest Vertex
-dff g = dfs g [0 .. n] where (_, n) = bounds g
+dfforest :: Graph -> Forest Vertex
+dfforest g = dfs g [0 .. n] where (_, n) = bounds g
 
 -- Calculate pre-order numbering
 preArr :: Bounds -> Forest Vertex -> Table Int
@@ -93,14 +93,14 @@ bicomponents t@(Node (v, dv, lv) ts) = [Node (v : vs) us | (lw, Node vs us) <- c
     collected = map collect ts
 
 -- Main function to find biconnected components
-bcc :: Graph -> Forest [Vertex]
-bcc g = concatMap (bicomponents . label g dnumber) forest
+bconnectedcomps :: Graph -> Forest [Vertex]
+bconnectedcomps g = concatMap (bicomponents . label g dnumber) forest
   where
-    forest = dff g
+    forest = dfforest g
     dnumber = preArr (bounds g) forest
 
 -- Example usage
 main :: IO ()
 main = do
-  let g = buildG (0, 8) [(0, 1), (1, 2), (2, 0), (1, 3), (3, 4), (4, 5), (5, 3), (5, 6), (6, 7), (7, 8), (8, 6)]
-  print (bcc g)
+  let g = buildGraph (0, 8) [(0, 1), (1, 2), (2, 0), (1, 3), (3, 4), (4, 5), (5, 3), (5, 6), (6, 7), (7, 8), (8, 6)]
+  print (bconnectedcomps g)
