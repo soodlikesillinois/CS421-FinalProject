@@ -5,7 +5,7 @@ import Data.Tree
 import Data.List
 
 type Table a = Array Vertex a
-type BCCState = (Table Int, Table Int, Int)
+type BiccState = (Table Int, Table Int, Int)
 
 -- Calculate the depth-first spanning forest
 dff :: Graph -> Forest Vertex
@@ -16,7 +16,7 @@ preArr :: Bounds -> Forest Vertex -> Table Int
 preArr bnds forest = array bnds (zip (concatMap flatten forest) [0..])
 
 -- Label the tree with depth-first numbers and low-point numbers
-label :: Graph -> Tree Vertex -> State BCCState (Tree (Vertex, Int, Int))
+label :: Graph -> Tree Vertex -> State BiccState (Tree (Vertex, Int, Int))
 label g (Node v ts) = do
     (pre, low, time) <- get
     let pre' = pre // [(v, time)]
